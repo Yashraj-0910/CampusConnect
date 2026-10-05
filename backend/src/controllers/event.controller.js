@@ -148,10 +148,103 @@ const getRegisteredEvents = async (req, res) => {
       order: [[Event, 'event_date', 'ASC']]
     });
 
-    res.json(registrations.map(r => r.Event));
+    res.json(registrations.map(r => ({
+      ...r.Event.toJSON(),
+      registration_id: r.id,
+      ticket_token: r.ticket_token,
+      attendance_status: r.status,
+      attended_at: r.attended_at
+    })));
   } catch (error) {
     console.error('Error fetching registered events:', error);
     res.status(500).json({ message: 'Server error fetching registered events' });
+  }
+};
+
+// Verify student QR code / ticket token to mark attendance
+const verifyAttendance = async (req, res) => {
+  const { id: eventId } = req.params;
+  const { ticket_token } = req.body;
+
+  try {
+    if (!ticket_token) {
+      return res.status(400).json({ success: false, message: 'Ticket token is required.' });
+    }
+
+    const registration = await EventRegistration.findOne({
+      where: {
+        event_id: eventId,
+        ticket_token
+      },
+      include: [
+        {
+          model: Student,
+          include: [{ model: User, attributes: ['id', 'name', 'email'] }]
+        },
+        {
+          model: Event,
+          include: [{ model: Club, attributes: ['id', 'name'] }]
+        }
+      ]
+    });
+
+    if (!registration) {
+      return res.status(404).json({
+        success: false,
+        message: 'Invalid ticket! No matching registration found for this event.'
+      });
+    }
+
+    if (registration.status === 'attended') {
+      return res.status(200).json({
+        success: true,
+        already_verified: true,
+        message: `Student ${registration.Student.User.name} is ALREADY marked as attended at ${new Date(registration.attended_at).toLocaleTimeString()}.`,
+        registration
+      });
+    }
+
+    registration.status = 'attended';
+    registration.attended_at = new Date();
+    await registration.save();
+
+    res.json({
+      success: true,
+      already_verified: false,
+      message: `Attendance verified! Welcome, ${registration.Student.User.name}.`,
+      registration
+    });
+  } catch (error) {
+    console.error('Error verifying attendance:', error);
+    res.status(500).json({ success: false, message: 'Server error verifying attendance' });
+  }
+};
+
+// Get all attendees for an event (Coordinator / Admin view)
+const getEventAttendees = async (req, res) => {
+  const { id: eventId } = req.params;
+
+  try {
+    const attendees = await EventRegistration.findAll({
+      where: { event_id: eventId },
+      include: [
+        {
+          model: Student,
+          include: [{ model: User, attributes: ['id', 'name', 'email'] }]
+        }
+      ],
+      order: [['registered_at', 'ASC']]
+    });
+
+    res.json({
+      success: true,
+      total_registered: attendees.length,
+      total_attended: attendees.filter(a => a.status === 'attended').length,
+      attendees
+    });
+  } catch (error) {
+    console.error('Error fetching event attendees:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch attendees' });
   }
 };
 
@@ -159,5 +252,7 @@ module.exports = {
   getEvents,
   getEventById,
   registerForEvent,
-  getRegisteredEvents
+  getRegisteredEvents,
+  verifyAttendance,
+  getEventAttendees
 };

@@ -20,6 +20,15 @@ const EventRegistration = sequelize.define('EventRegistration', {
     defaultValue: 'registered',
     allowNull: false
   },
+  ticket_token: {
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
+    allowNull: false
+  },
+  attended_at: {
+    type: DataTypes.DATE,
+    allowNull: true
+  },
   registered_at: {
     type: DataTypes.DATE,
     defaultValue: DataTypes.NOW

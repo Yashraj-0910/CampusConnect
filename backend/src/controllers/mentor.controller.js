@@ -27,7 +27,7 @@ const getMentors = async (req, res) => {
       where: whereClause,
       include: {
         model: User,
-        attributes: ['name', 'email']
+        attributes: ['id', 'name', 'email', 'role']
       },
       order: [['created_at', 'DESC']]
     });

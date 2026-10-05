@@ -15,9 +15,11 @@ import {
   ShieldCheck,
   Sparkles,
   AlertCircle,
-  X
+  X,
+  MessageSquare
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import ChatModal from '../components/ChatModal';
 
 const ClubDetails = () => {
   const { id } = useParams();
@@ -27,6 +29,7 @@ const ClubDetails = () => {
 
   // Application Modal state
   const [modalOpen, setModalOpen] = useState(false);
+  const [chatOpen, setChatOpen] = useState(false);
   const [formData, setFormData] = useState({
     skills: '',
     experience: '',
@@ -155,14 +158,25 @@ const ClubDetails = () => {
               </div>
             </div>
 
-            <div>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => {
+                  if (!user) return alert('Please sign in to join the club channel!');
+                  setChatOpen(true);
+                }}
+                className="rounded-2xl border border-indigo-200 bg-indigo-50 hover:bg-indigo-100 px-5 py-3.5 text-xs font-bold text-indigo-700 transition flex items-center gap-2"
+              >
+                <MessageSquare className="w-4 h-4" />
+                <span>Club Lounge</span>
+              </button>
+
               {isOpen ? (
                 <button
                   onClick={() => {
                     if (!user) return alert('Please sign in to apply to this club!');
                     setModalOpen(true);
                   }}
-                  className="rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 px-8 py-4 text-sm font-bold text-white shadow-lg shadow-indigo-600/20 hover:opacity-95 transition-all cursor-pointer flex items-center gap-2"
+                  className="rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 px-7 py-3.5 text-xs font-bold text-white shadow-lg shadow-indigo-600/20 hover:opacity-95 transition-all cursor-pointer flex items-center gap-2"
                 >
                   <Sparkles className="h-4 w-4 text-cyan-200" />
                   <span>Apply for Membership</span>
@@ -417,6 +431,15 @@ const ClubDetails = () => {
           </div>
         )}
       </AnimatePresence>
+
+      {/* Club Channel Chat Modal */}
+      {chatOpen && club && (
+        <ChatModal
+          isOpen={chatOpen}
+          onClose={() => setChatOpen(false)}
+          clubData={club}
+        />
+      )}
     </div>
   );
 };

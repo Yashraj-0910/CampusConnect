@@ -10,8 +10,13 @@ import {
   Trash2,
   Sparkles,
   UserCheck,
-  Building2
+  Building2,
+  Check,
+  X,
+  Clock,
+  AlertTriangle
 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
 const AdminDashboard = () => {
@@ -19,6 +24,7 @@ const AdminDashboard = () => {
   const [popularClubs, setPopularClubs] = useState([]);
   const [students, setStudents] = useState([]);
   const [clubs, setClubs] = useState([]);
+  const [venueRequests, setVenueRequests] = useState([]);
   const [loading, setLoading] = useState(true);
 
   // Form states
@@ -40,14 +46,18 @@ const AdminDashboard = () => {
 
   const fetchAdminData = async () => {
     try {
-      const statsRes = await API.get('/admin/dashboard');
-      const studentsRes = await API.get('/admin/students');
-      const clubsRes = await API.get('/clubs?limit=100');
+      const [statsRes, studentsRes, clubsRes, venuesRes] = await Promise.all([
+        API.get('/admin/dashboard'),
+        API.get('/admin/students'),
+        API.get('/clubs?limit=100'),
+        API.get('/venues/admin/requests')
+      ]);
 
       setStats(statsRes.data.stats);
       setPopularClubs(statsRes.data.analytics?.popularClubs || []);
       setStudents(studentsRes.data.students || []);
       setClubs(clubsRes.data.clubs || []);
+      setVenueRequests(venuesRes.data.bookings || []);
     } catch (err) {
       console.error('Error fetching admin data:', err);
     } finally {
@@ -58,6 +68,15 @@ const AdminDashboard = () => {
   useEffect(() => {
     fetchAdminData();
   }, []);
+
+  const handleUpdateVenueStatus = async (id, status) => {
+    try {
+      await API.put(`/venues/admin/requests/${id}`, { status });
+      fetchAdminData();
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to update venue booking status');
+    }
+  };
 
   const handleAssignCoordinator = async (e) => {
     e.preventDefault();
@@ -258,6 +277,100 @@ const AdminDashboard = () => {
                         </td>
                       </tr>
                     ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Campus Venue & Facility Requests */}
+            <div className="glass-card rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm bg-white">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-xl font-bold font-['Space_Grotesk'] text-slate-900 flex items-center gap-2">
+                    <Building2 className="w-5 h-5 text-indigo-600" />
+                    <span>Campus Venue Booking Requests ({venueRequests.length})</span>
+                  </h2>
+                  <p className="text-xs text-slate-500 mt-1">Review club facility reservation requests and resolve schedule conflicts.</p>
+                </div>
+                <Link
+                  to="/venues"
+                  className="text-xs font-bold text-indigo-600 hover:text-indigo-700 flex items-center gap-1"
+                >
+                  <span>Explore Venues</span>
+                </Link>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                      <th className="py-3 px-2">Venue & Purpose</th>
+                      <th className="py-3 px-2">Club & Requester</th>
+                      <th className="py-3 px-2">Date & Slot</th>
+                      <th className="py-3 px-2">Status</th>
+                      <th className="py-3 px-2 text-right">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 text-xs">
+                    {venueRequests.map((b) => (
+                      <tr key={b.id} className="hover:bg-slate-50/60 transition">
+                        <td className="py-3.5 px-2 font-bold text-slate-900">
+                          <div>{b.Venue?.name}</div>
+                          <div className="text-[11px] font-normal text-slate-500 line-clamp-1">{b.purpose}</div>
+                        </td>
+                        <td className="py-3.5 px-2">
+                          <div className="font-semibold text-slate-800">{b.Club?.name || 'Club'}</div>
+                          <div className="text-[11px] text-slate-400">{b.User?.name}</div>
+                        </td>
+                        <td className="py-3.5 px-2 font-medium text-slate-700">
+                          <div>{b.booking_date}</div>
+                          <div className="text-[11px] font-mono text-indigo-600 font-bold">{b.start_time} - {b.end_time}</div>
+                        </td>
+                        <td className="py-3.5 px-2">
+                          <span
+                            className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                              b.status === 'approved'
+                                ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                                : b.status === 'rejected'
+                                ? 'bg-rose-100 text-rose-800 border border-rose-300'
+                                : 'bg-amber-100 text-amber-800 border border-amber-300'
+                            }`}
+                          >
+                            {b.status}
+                          </span>
+                        </td>
+                        <td className="py-3.5 px-2 text-right">
+                          {b.status === 'pending' ? (
+                            <div className="flex items-center justify-end gap-1.5">
+                              <button
+                                onClick={() => handleUpdateVenueStatus(b.id, 'approved')}
+                                className="p-1.5 rounded-xl bg-emerald-50 text-emerald-700 hover:bg-emerald-600 hover:text-white border border-emerald-200 transition"
+                                title="Approve Request"
+                              >
+                                <Check className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => handleUpdateVenueStatus(b.id, 'rejected')}
+                                className="p-1.5 rounded-xl bg-rose-50 text-rose-700 hover:bg-rose-600 hover:text-white border border-rose-200 transition"
+                                title="Reject Request"
+                              >
+                                <X className="w-4 h-4" />
+                              </button>
+                            </div>
+                          ) : (
+                            <span className="text-[10px] text-slate-400 font-medium">Completed</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+
+                    {venueRequests.length === 0 && (
+                      <tr>
+                        <td colSpan="5" className="py-8 text-center text-xs text-slate-400 font-medium">
+                          No venue requests submitted yet.
+                        </td>
+                      </tr>
+                    )}
                   </tbody>
                 </table>
               </div>

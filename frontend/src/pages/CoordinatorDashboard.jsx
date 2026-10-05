@@ -12,14 +12,34 @@ import {
   Users,
   Sparkles,
   Clock,
-  Radio
+  Radio,
+  QrCode,
+  Building2,
+  Search,
+  Loader2,
+  CheckCheck,
+  Camera
 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import CameraQRScanner from '../components/CameraQRScanner';
 
 const CoordinatorDashboard = () => {
   const [club, setClub] = useState(null);
   const [applicants, setApplicants] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // Tab State: 'overview' | 'attendance' | 'create_event' | 'announcements'
+  const [activeTab, setActiveTab] = useState('overview');
+
+  // Attendance State
+  const [selectedEventId, setSelectedEventId] = useState('');
+  const [ticketInput, setTicketInput] = useState('');
+  const [showCameraScanner, setShowCameraScanner] = useState(false);
+  const [verifying, setVerifying] = useState(false);
+  const [verifyResult, setVerifyResult] = useState(null);
+  const [attendeesData, setAttendeesData] = useState(null);
+  const [loadingAttendees, setLoadingAttendees] = useState(false);
 
   // Forms
   const [newEvent, setNewEvent] = useState({
@@ -50,6 +70,9 @@ const CoordinatorDashboard = () => {
       if (data.club) {
         const appsRes = await API.get(`/coordinator/clubs/${data.club.id}/applicants`);
         setApplicants(appsRes.data || []);
+        if (data.club.Events?.length > 0) {
+          setSelectedEventId(data.club.Events[0].id);
+        }
       }
     } catch (err) {
       console.error('Error fetching coordinator club:', err);
@@ -61,6 +84,59 @@ const CoordinatorDashboard = () => {
   useEffect(() => {
     fetchCoordinatorClub();
   }, []);
+
+  // Fetch event attendees when selected event changes
+  useEffect(() => {
+    if (!selectedEventId) return;
+
+    const fetchAttendees = async () => {
+      setLoadingAttendees(true);
+      try {
+        const res = await API.get(`/events/${selectedEventId}/attendees`);
+        if (res.data.success) {
+          setAttendeesData(res.data);
+        }
+      } catch (err) {
+        console.error('Failed to load attendees:', err);
+      } finally {
+        setLoadingAttendees(false);
+      }
+    };
+
+    fetchAttendees();
+  }, [selectedEventId]);
+
+  const handleVerifyAttendance = async (e, rawToken) => {
+    if (e && e.preventDefault) e.preventDefault();
+    const tokenToVerify = (rawToken || ticketInput || '').trim();
+    if (!selectedEventId || !tokenToVerify) return;
+
+    setVerifying(true);
+    setVerifyResult(null);
+
+    try {
+      const res = await API.post(`/events/${selectedEventId}/verify-attendance`, {
+        ticket_token: tokenToVerify
+      });
+
+      setVerifyResult({
+        success: true,
+        already_verified: res.data.already_verified,
+        message: res.data.message
+      });
+      setTicketInput('');
+      setShowCameraScanner(false);
+
+      // Refresh attendee list
+      const updated = await API.get(`/events/${selectedEventId}/attendees`);
+      if (updated.data.success) setAttendeesData(updated.data);
+    } catch (err) {
+      const msg = err.response?.data?.message || 'Verification failed. Invalid ticket token.';
+      setVerifyResult({ success: false, message: msg });
+    } finally {
+      setVerifying(false);
+    }
+  };
 
   const handleApplication = async (regId, status) => {
     try {
@@ -156,14 +232,228 @@ const CoordinatorDashboard = () => {
               <p className="text-slate-500 text-xs mt-1 font-medium">Category: <span className="uppercase text-slate-800 font-bold">{club.category}</span></p>
             </div>
             <div className="flex items-center gap-3">
-              <span className="rounded-2xl border border-indigo-200 bg-indigo-50 px-4 py-2 text-xs font-bold text-indigo-700">
+              <Link
+                to="/venues"
+                className="flex items-center gap-1.5 rounded-2xl border border-indigo-200 bg-indigo-50 hover:bg-indigo-100 px-4 py-2 text-xs font-bold text-indigo-700 transition"
+              >
+                <Building2 className="w-4 h-4" />
+                <span>Reserve Venue</span>
+              </Link>
+              <span className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2 text-xs font-bold text-slate-700">
                 {club.ClubMembers?.length || 0} Core Members
               </span>
             </div>
           </div>
+
+          {/* Tab Navigation */}
+          <div className="mt-8 flex flex-wrap gap-2 border-t border-slate-100 pt-6">
+            <button
+              onClick={() => setActiveTab('overview')}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition ${
+                activeTab === 'overview'
+                  ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-600/20'
+                  : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
+              }`}
+            >
+              <Users className="w-4 h-4" />
+              <span>Applicants & Roster</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('attendance')}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition ${
+                activeTab === 'attendance'
+                  ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-600/20'
+                  : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
+              }`}
+            >
+              <QrCode className="w-4 h-4" />
+              <span>QR Attendance Scanner</span>
+            </button>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* QR Attendance Scanner Tab */}
+        {activeTab === 'attendance' && (
+          <div className="glass-card rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm bg-white space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h2 className="text-xl font-bold font-['Space_Grotesk'] text-slate-900 flex items-center gap-2">
+                  <QrCode className="h-5 w-5 text-indigo-600" />
+                  <span>Live Event Check-in & QR Attendance Scanner</span>
+                </h2>
+                <p className="text-xs text-slate-500 mt-1">
+                  Scan attendee QR passes or enter ticket token to mark attendance and enable certificates.
+                </p>
+              </div>
+
+              {/* Event Dropdown Selector */}
+              {club.Events?.length > 0 && (
+                <div className="flex items-center gap-2">
+                  <label className="text-xs font-bold text-slate-700">Select Event:</label>
+                  <select
+                    value={selectedEventId}
+                    onChange={(e) => setSelectedEventId(e.target.value)}
+                    className="bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 focus:outline-none focus:border-indigo-500"
+                  >
+                    {club.Events.map((ev) => (
+                      <option key={ev.id} value={ev.id}>
+                        {ev.title} ({new Date(ev.event_date).toLocaleDateString()})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+            </div>
+
+            {/* Check-in Form & Live Camera Option */}
+            <div className="p-6 rounded-2xl bg-indigo-50/60 border border-indigo-100 space-y-4">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+                <span className="text-xs font-bold text-slate-700">Choose Check-in Method:</span>
+                <button
+                  type="button"
+                  onClick={() => setShowCameraScanner(!showCameraScanner)}
+                  className="flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white text-xs font-bold shadow-md shadow-indigo-600/20 transition"
+                >
+                  <Camera className="w-4 h-4" />
+                  <span>{showCameraScanner ? 'Close Camera View' : '📷 Open Live Camera Scanner'}</span>
+                </button>
+              </div>
+
+              {/* Live Camera Scanner Viewport */}
+              <AnimatePresence>
+                {showCameraScanner && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="overflow-hidden"
+                  >
+                    <CameraQRScanner
+                      onScanSuccess={(token) => handleVerifyAttendance(null, token)}
+                      onClose={() => setShowCameraScanner(false)}
+                    />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Manual Entry Fallback */}
+              <form onSubmit={handleVerifyAttendance} className="flex flex-col sm:flex-row gap-3 pt-2">
+                <div className="relative flex-1">
+                  <QrCode className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
+                  <input
+                    type="text"
+                    required
+                    value={ticketInput}
+                    onChange={(e) => setTicketInput(e.target.value)}
+                    placeholder="Or paste 36-character Ticket Pass UUID / QR payload..."
+                    className="w-full bg-white border border-indigo-200 rounded-xl pl-10 pr-4 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-indigo-600 font-mono"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={verifying || !ticketInput.trim()}
+                  className="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-bold text-xs transition flex items-center justify-center gap-2 shadow-sm"
+                >
+                  {verifying ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Checking In...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Check className="w-4 h-4" />
+                      <span>Verify & Check In</span>
+                    </>
+                  )}
+                </button>
+              </form>
+
+              {/* Result Banner */}
+              {verifyResult && (
+                <div
+                  className={`mt-4 p-4 rounded-xl text-xs flex items-center gap-2.5 ${
+                    verifyResult.success
+                      ? 'bg-emerald-100 border border-emerald-300 text-emerald-900 font-medium'
+                      : 'bg-rose-100 border border-rose-300 text-rose-900 font-medium'
+                  }`}
+                >
+                  {verifyResult.success ? (
+                    <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />
+                  ) : (
+                    <XCircle className="w-5 h-5 text-rose-600 flex-shrink-0" />
+                  )}
+                  <span>{verifyResult.message}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Attendance Roster Metrics & List */}
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-sm font-bold text-slate-800">
+                  Registered Attendees ({attendeesData?.total_attended || 0} / {attendeesData?.total_registered || 0} Checked In)
+                </h3>
+              </div>
+
+              {loadingAttendees ? (
+                <div className="py-8 text-center text-slate-400 text-xs">
+                  <Loader2 className="w-5 h-5 animate-spin mx-auto mb-2 text-indigo-500" />
+                  Loading attendee roster...
+                </div>
+              ) : attendeesData?.attendees?.length === 0 ? (
+                <div className="py-8 text-center text-slate-400 text-xs font-medium">
+                  No registrations recorded for this event yet.
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse">
+                    <thead>
+                      <tr className="border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                        <th className="py-2.5 px-3">Student Name</th>
+                        <th className="py-2.5 px-3">Email</th>
+                        <th className="py-2.5 px-3">Ticket Pass Code</th>
+                        <th className="py-2.5 px-3">Attendance Status</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 text-xs">
+                      {attendeesData?.attendees?.map((att) => {
+                        const isAtt = att.status === 'attended';
+                        return (
+                          <tr key={att.id} className="hover:bg-slate-50/60 transition">
+                            <td className="py-3 px-3 font-bold text-slate-900">
+                              {att.Student?.User?.name || 'Student'}
+                            </td>
+                            <td className="py-3 px-3 text-slate-500">
+                              {att.Student?.User?.email}
+                            </td>
+                            <td className="py-3 px-3 font-mono text-[11px] text-indigo-600">
+                              {att.ticket_token?.slice(0, 18)}...
+                            </td>
+                            <td className="py-3 px-3">
+                              <span
+                                className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                                  isAtt
+                                    ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                                    : 'bg-slate-100 text-slate-600 border border-slate-200'
+                                }`}
+                              >
+                                {isAtt ? 'Attended ✓' : 'Registered'}
+                              </span>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Overview Tab Content */}
+        {activeTab === 'overview' && (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           
           {/* Main Area: Pending Applicants & Members */}
           <div className="lg:col-span-2 space-y-8">
@@ -395,6 +685,7 @@ const CoordinatorDashboard = () => {
             </div>
           </div>
         </div>
+        )}
       </div>
     </div>
   );

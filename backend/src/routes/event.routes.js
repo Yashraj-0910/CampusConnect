@@ -3,7 +3,9 @@ const {
   getEvents,
   getEventById,
   registerForEvent,
-  getRegisteredEvents
+  getRegisteredEvents,
+  verifyAttendance,
+  getEventAttendees
 } = require('../controllers/event.controller');
 const { protect } = require('../middleware/auth.middleware');
 
@@ -13,5 +15,7 @@ router.get('/', getEvents);
 router.get('/registered', protect, getRegisteredEvents);
 router.get('/:id', getEventById);
 router.post('/:id/register', protect, registerForEvent);
+router.post('/:id/verify-attendance', protect, verifyAttendance);
+router.get('/:id/attendees', protect, getEventAttendees);
 
 module.exports = router;

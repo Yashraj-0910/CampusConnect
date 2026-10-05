@@ -16,7 +16,9 @@ import {
   LayoutDashboard,
   Menu,
   X,
-  ChevronDown
+  ChevronDown,
+  Building2,
+  MessageSquare
 } from 'lucide-react';
 
 const Navbar = () => {
@@ -38,8 +40,10 @@ const Navbar = () => {
   const navLinks = [
     { name: 'Explore Clubs', path: '/explore', icon: Compass },
     { name: 'Events', path: '/events', icon: Calendar },
+    { name: 'Venues', path: '/venues', icon: Building2 },
     { name: 'Roadmap', path: '/roadmap', icon: Map },
     { name: 'Mentors', path: '/mentors', icon: Users },
+    ...(user ? [{ name: 'Messages', path: '/messages', icon: MessageSquare }] : []),
     { name: 'FAQs', path: '/faq', icon: HelpCircle },
   ];
 

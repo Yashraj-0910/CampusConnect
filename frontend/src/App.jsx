@@ -19,6 +19,8 @@ import EventDetails from './pages/EventDetails';
 import Roadmap from './pages/Roadmap';
 import FAQ from './pages/FAQ';
 import ResetPassword from './pages/ResetPassword';
+import Venues from './pages/Venues';
+import Messages from './pages/Messages';
 
 // Student Pages
 import StudentDashboard from './pages/StudentDashboard';
@@ -46,9 +48,20 @@ function App() {
                 <Route path="/clubs/:id" element={<ClubDetails />} />
                 <Route path="/events" element={<Events />} />
                 <Route path="/events/:id" element={<EventDetails />} />
+                <Route path="/venues" element={<Venues />} />
                 <Route path="/roadmap" element={<Roadmap />} />
                 <Route path="/faq" element={<FAQ />} />
                 <Route path="/reset-password/:token" element={<ResetPassword />} />
+
+                {/* Messages & Chat Route */}
+                <Route
+                  path="/messages"
+                  element={
+                    <ProtectedRoute allowedRoles={['student', 'coordinator', 'admin']}>
+                      <Messages />
+                    </ProtectedRoute>
+                  }
+                />
 
                 {/* Student Protected Routes */}
                 <Route

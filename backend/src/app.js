@@ -37,6 +37,8 @@ const mentorRoutes = require('./routes/mentor.routes');
 const faqRoutes = require('./routes/faq.routes');
 const adminRoutes = require('./routes/admin.routes');
 const coordinatorRoutes = require('./routes/coordinator.routes');
+const chatRoutes = require('./routes/chat.routes');
+const venueRoutes = require('./routes/venue.routes');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/clubs', clubRoutes);
@@ -47,6 +49,8 @@ app.use('/api/mentors', mentorRoutes);
 app.use('/api/faqs', faqRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/coordinator', coordinatorRoutes);
+app.use('/api/chat', chatRoutes);
+app.use('/api/venues', venueRoutes);
 
 // Base route
 app.get('/', (req, res) => {

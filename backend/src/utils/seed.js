@@ -13,7 +13,10 @@ const {
   Announcement,
   FAQ,
   Mentor,
-  StudentInterest
+  StudentInterest,
+  Venue,
+  VenueBooking,
+  Message
 } = require('../models');
 
 async function ensureDatabaseExists() {
@@ -471,6 +474,128 @@ async function seed() {
       { question: 'Is there a fee for joining clubs?', answer: 'No. Campus Compass and all listed college student clubs are entirely free to register and join.', category: 'General' },
       { question: 'What is a Model United Nations (MUN)?', answer: 'MUN is a debate competition simulating UN councils, organized by the Debate Club to improve international relations and speech skills.', category: 'Literary Clubs' },
       { question: 'Where do club workshops take place?', answer: 'Locations vary between CS labs, seminar halls, and online platforms. The venue is always specified on the event card.', category: 'Events' }
+    ]);
+
+    console.log('Creating Campus Venues...');
+    const venues = await Venue.bulkCreate([
+      {
+        name: 'Dr. APJ Abdul Kalam Auditorium',
+        code: 'AUD-MAIN-01',
+        type: 'Auditorium',
+        capacity: 500,
+        location: 'Central Administrative Block, 2nd Floor',
+        amenities: ['High-Power Projector', 'Central AC', 'Digital Sound System', 'Stage Lighting', 'Green Room', 'Wi-Fi'],
+        image_url: 'https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1200&q=80',
+        is_active: true
+      },
+      {
+        name: 'Sir CV Raman Seminar Hall',
+        code: 'SEM-HALL-02',
+        type: 'Seminar Hall',
+        capacity: 160,
+        location: 'Science & Tech Block, 1st Floor',
+        amenities: ['Interactive Smart Board', 'AC', 'Dual Microphones', 'Podium', 'Wi-Fi'],
+        image_url: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=1200&q=80',
+        is_active: true
+      },
+      {
+        name: 'Alan Turing Computing Center (Lab 3)',
+        code: 'LAB-CS-03',
+        type: 'Computer Lab',
+        capacity: 80,
+        location: 'Computer Engineering Department, Ground Floor',
+        amenities: ['80 High-End Linux/Windows Workstations', 'Gigabit LAN', 'Overhead Projector', 'AC', 'Backup Power'],
+        image_url: 'https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=1200&q=80',
+        is_active: true
+      },
+      {
+        name: 'Swami Vivekananda Open Amphitheatre',
+        code: 'AMPHI-OPEN-04',
+        type: 'Open Amphitheatre',
+        capacity: 800,
+        location: 'Campus Quadrangle Garden Area',
+        amenities: ['Open Air Seating', 'Stage Power Outlets', 'Acoustic Shell', 'Floodlights'],
+        image_url: 'https://images.unsplash.com/photo-1469488865564-c2de10f69f96?auto=format&fit=crop&w=1200&q=80',
+        is_active: true
+      },
+      {
+        name: 'Vikram Sarabhai Innovation & Incubation Cell',
+        code: 'CONF-ECELL-05',
+        type: 'Conference Room',
+        capacity: 40,
+        location: 'R&D Innovation Building, Room 104',
+        amenities: ['Video Conferencing Bar', 'Glass Whiteboards', 'Ergonomic Seating', 'AC', 'Coffee Station'],
+        image_url: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1200&q=80',
+        is_active: true
+      },
+      {
+        name: 'Major Dhyan Chand Sports Arena',
+        code: 'SPORTS-ARENA-06',
+        type: 'Sports Ground',
+        capacity: 1000,
+        location: 'Sports & Gymnasium Complex',
+        amenities: ['Hardwood Badminton/Basketball Courts', 'Scoreboard Display', 'Locker Rooms', 'PA Audio System'],
+        image_url: 'https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=1200&q=80',
+        is_active: true
+      }
+    ], { returning: true });
+
+    console.log('Creating Venue Bookings...');
+    await VenueBooking.bulkCreate([
+      {
+        venue_id: venues[0].id,
+        club_id: codingClub.id,
+        user_id: coordinatorUser.id,
+        booking_date: new Date(Date.now() + 8 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        start_time: '10:00',
+        end_time: '17:00',
+        purpose: 'Annual 24-Hour National Hackathon Grand Finale',
+        expected_attendees: 300,
+        status: 'approved',
+        admin_notes: 'Approved by Dean Office. Sound and AV team notified.'
+      },
+      {
+        venue_id: venues[1].id,
+        club_id: aiClub.id,
+        user_id: coordinatorUser.id,
+        booking_date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        start_time: '14:00',
+        end_time: '17:00',
+        purpose: 'Hands-on Deep Learning & LLM Fine-Tuning Bootcamp',
+        expected_attendees: 120,
+        status: 'pending',
+        admin_notes: null
+      }
+    ]);
+
+    console.log('Creating Initial Chat Messages...');
+    await Message.bulkCreate([
+      {
+        sender_id: studentUser.id,
+        receiver_id: mentorUsers[0].id,
+        content: 'Hi Siddharth! I had a quick question regarding competitive programming vs web dev roadmaps for 1st year.',
+        message_type: 'direct',
+        read_at: new Date()
+      },
+      {
+        sender_id: mentorUsers[0].id,
+        receiver_id: studentUser.id,
+        content: 'Hey Jane! Great to connect. In 1st year, prioritize mastering Data Structures in C++ or Java first. Once comfortable with basics, you can pick up Full-Stack web dev!',
+        message_type: 'direct',
+        read_at: null
+      },
+      {
+        sender_id: coordinatorUser.id,
+        club_id: codingClub.id,
+        content: 'Welcome everyone to the official Coding Club Channel! We will post project sprints and pair-programming links here.',
+        message_type: 'club_channel'
+      },
+      {
+        sender_id: studentUser.id,
+        club_id: codingClub.id,
+        content: 'Super excited to collaborate with the team on upcoming projects!',
+        message_type: 'club_channel'
+      }
     ]);
 
     console.log('Seeding process complete! Database populated.');

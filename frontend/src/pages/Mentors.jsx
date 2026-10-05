@@ -11,14 +11,19 @@ import {
   BookOpen,
   Award,
   X,
-  Compass
+  Compass,
+  MessageCircle
 } from 'lucide-react';
+import ChatModal from '../components/ChatModal';
 
 const Mentors = () => {
   const [mentors, setMentors] = useState([]);
   const [department, setDepartment] = useState('');
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
+
+  // Live Chat state
+  const [chatMentor, setChatMentor] = useState(null);
 
   // QA dialog state
   const [selectedMentor, setSelectedMentor] = useState(null);
@@ -186,13 +191,28 @@ const Mentors = () => {
                   </div>
                 </div>
 
-                <button
-                  onClick={() => handleOpenQA(mentor)}
-                  className="mt-6 flex items-center justify-center gap-2 rounded-2xl bg-cyan-50 hover:bg-cyan-600 text-cyan-700 hover:text-white border border-cyan-200 py-2.5 text-xs font-bold transition-all duration-200 cursor-pointer shadow-xs"
-                >
-                  <MessageSquare className="h-4 w-4" />
-                  <span>Ask Question</span>
-                </button>
+                <div className="mt-6 flex items-center gap-2">
+                  <button
+                    onClick={() => handleOpenQA(mentor)}
+                    className="flex-1 flex items-center justify-center gap-1.5 rounded-2xl bg-cyan-50 hover:bg-cyan-600 text-cyan-700 hover:text-white border border-cyan-200 py-2.5 text-xs font-bold transition-all duration-200 cursor-pointer shadow-xs"
+                  >
+                    <MessageSquare className="h-4 w-4" />
+                    <span>Q&A</span>
+                  </button>
+                  <button
+                    onClick={() => setChatMentor({
+                      id: mentor.User?.id || mentor.user_id,
+                      name: mentor.User?.name || 'Senior Mentor',
+                      email: mentor.User?.email,
+                      role: 'Senior Mentor',
+                      department: mentor.department
+                    })}
+                    className="flex-1 flex items-center justify-center gap-1.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 text-xs font-bold transition-all duration-200 cursor-pointer shadow-xs"
+                  >
+                    <MessageCircle className="h-4 w-4" />
+                    <span>Live Chat</span>
+                  </button>
+                </div>
               </motion.div>
             ))}
 
@@ -290,6 +310,15 @@ const Mentors = () => {
           </div>
         )}
       </AnimatePresence>
+
+      {/* 1-on-1 Direct Chat Modal */}
+      {chatMentor && (
+        <ChatModal
+          isOpen={Boolean(chatMentor)}
+          onClose={() => setChatMentor(null)}
+          recipientUser={chatMentor}
+        />
+      )}
     </div>
   );
 };

@@ -15,6 +15,9 @@ const FAQ = require('./FAQ');
 const StudentInterest = require('./StudentInterest');
 const Achievement = require('./Achievement');
 const EventGallery = require('./EventGallery');
+const Message = require('./Message');
+const Venue = require('./Venue');
+const VenueBooking = require('./VenueBooking');
 
 // User <-> Student (One-to-One)
 User.hasOne(Student, { foreignKey: 'user_id', onDelete: 'CASCADE' });
@@ -88,6 +91,29 @@ Achievement.belongsTo(Club, { foreignKey: 'club_id' });
 Event.hasMany(EventGallery, { foreignKey: 'event_id', onDelete: 'CASCADE' });
 EventGallery.belongsTo(Event, { foreignKey: 'event_id' });
 
+// Chat & Message Associations
+User.hasMany(Message, { foreignKey: 'sender_id', as: 'sent_messages', onDelete: 'CASCADE' });
+Message.belongsTo(User, { foreignKey: 'sender_id', as: 'sender' });
+
+User.hasMany(Message, { foreignKey: 'receiver_id', as: 'received_messages', onDelete: 'CASCADE' });
+Message.belongsTo(User, { foreignKey: 'receiver_id', as: 'receiver' });
+
+Club.hasMany(Message, { foreignKey: 'club_id', as: 'channel_messages', onDelete: 'CASCADE' });
+Message.belongsTo(Club, { foreignKey: 'club_id', as: 'club' });
+
+// Venue & Booking Associations
+Venue.hasMany(VenueBooking, { foreignKey: 'venue_id', onDelete: 'CASCADE' });
+VenueBooking.belongsTo(Venue, { foreignKey: 'venue_id' });
+
+Club.hasMany(VenueBooking, { foreignKey: 'club_id', onDelete: 'SET NULL' });
+VenueBooking.belongsTo(Club, { foreignKey: 'club_id' });
+
+User.hasMany(VenueBooking, { foreignKey: 'user_id', onDelete: 'CASCADE' });
+VenueBooking.belongsTo(User, { foreignKey: 'user_id' });
+
+Event.hasOne(VenueBooking, { foreignKey: 'event_id', onDelete: 'SET NULL' });
+VenueBooking.belongsTo(Event, { foreignKey: 'event_id' });
+
 module.exports = {
   sequelize,
   User,
@@ -105,5 +131,8 @@ module.exports = {
   FAQ,
   StudentInterest,
   Achievement,
-  EventGallery
+  EventGallery,
+  Message,
+  Venue,
+  VenueBooking
 };

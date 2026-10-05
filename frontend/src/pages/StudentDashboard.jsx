@@ -14,20 +14,31 @@ import {
   Clock,
   ChevronRight,
   TrendingUp,
-  Bookmark
+  Bookmark,
+  QrCode,
+  MessageSquare,
+  Building2,
+  Download
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import API from '../services/api';
+import QRCodeModal from '../components/QRCodeModal';
+import CertificateModal from '../components/CertificateModal';
 
 const StudentDashboard = () => {
   const { user } = useContext(AuthContext);
   const [clubs, setClubs] = useState([]);
   const [applications, setApplications] = useState([]);
   const [events, setEvents] = useState([]);
+  const [registeredEvents, setRegisteredEvents] = useState([]);
   const [announcements, setAnnouncements] = useState([]);
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // Modals
+  const [selectedEventForQR, setSelectedEventForQR] = useState(null);
+  const [selectedEventForCert, setSelectedEventForCert] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -35,12 +46,14 @@ const StudentDashboard = () => {
         const clubsRes = await API.get('/clubs');
         const appsRes = await API.get('/clubs/registrations');
         const eventsRes = await API.get('/events?limit=5');
+        const regEventsRes = await API.get('/events/registered');
         const annRes = await API.get('/announcements?limit=5');
         const notifRes = await API.get('/notifications');
 
         setClubs(clubsRes.data.clubs || []);
         setApplications(appsRes.data || []);
         setEvents(eventsRes.data.events || []);
+        setRegisteredEvents(regEventsRes.data || []);
         setAnnouncements(annRes.data.announcements || []);
         setNotifications(notifRes.data || []);
       } catch (err) {
@@ -299,6 +312,95 @@ const StudentDashboard = () => {
                 </table>
               </div>
             </div>
+
+            {/* My Event Passes & Certificates */}
+            <div className="glass-card rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm bg-white">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-xl font-bold font-['Space_Grotesk'] text-slate-900 flex items-center gap-2">
+                    <QrCode className="w-5 h-5 text-indigo-600" />
+                    <span>My Registered Events & Entry Passes</span>
+                  </h2>
+                  <p className="text-xs text-slate-500 mt-1">
+                    Show QR entry passes at venues and download verified participation certificates.
+                  </p>
+                </div>
+                <Link
+                  to="/events"
+                  className="text-xs font-bold text-indigo-600 hover:text-indigo-700 flex items-center gap-1"
+                >
+                  <span>Explore Events</span>
+                  <ChevronRight className="w-4 h-4" />
+                </Link>
+              </div>
+
+              {registeredEvents.length === 0 ? (
+                <div className="py-8 text-center text-xs text-slate-500 font-medium">
+                  You haven't registered for any upcoming events yet.{' '}
+                  <Link to="/events" className="text-indigo-600 font-bold hover:underline">
+                    RSVP to Campus Events
+                  </Link>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {registeredEvents.map((ev) => {
+                    const isAttended = ev.attendance_status === 'attended';
+                    return (
+                      <div
+                        key={ev.registration_id || ev.id}
+                        className="p-4 rounded-2xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 transition flex flex-col justify-between"
+                      >
+                        <div>
+                          <div className="flex items-start justify-between gap-2">
+                            <h4 className="font-bold text-sm text-slate-900 line-clamp-1">{ev.title}</h4>
+                            <span
+                              className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                                isAttended
+                                  ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                                  : 'bg-indigo-100 text-indigo-800 border border-indigo-300'
+                              }`}
+                            >
+                              {isAttended ? 'Attended ✓' : 'Confirmed'}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-3 mt-2 text-[11px] text-slate-500">
+                            <span className="flex items-center gap-1">
+                              <Calendar className="w-3 h-3 text-indigo-500" />
+                              {new Date(ev.event_date).toLocaleDateString()}
+                            </span>
+                            <span className="truncate max-w-[120px]">{ev.venue || 'Campus Hall'}</span>
+                          </div>
+                        </div>
+
+                        <div className="mt-4 pt-3 border-t border-slate-200 flex items-center gap-2">
+                          <button
+                            onClick={() => setSelectedEventForQR(ev)}
+                            className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-white border border-slate-300 hover:border-indigo-500 text-slate-700 text-xs font-bold shadow-xs transition"
+                          >
+                            <QrCode className="w-3.5 h-3.5 text-indigo-600" />
+                            <span>Entry Pass</span>
+                          </button>
+
+                          {isAttended ? (
+                            <button
+                              onClick={() => setSelectedEventForCert(ev)}
+                              className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 text-white text-xs font-bold shadow-xs hover:opacity-95 transition"
+                            >
+                              <Award className="w-3.5 h-3.5" />
+                              <span>Certificate</span>
+                            </button>
+                          ) : (
+                            <span className="text-[10px] text-slate-400 font-medium px-2">
+                              Scan QR at door
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Sidebar: Bulletins & Quick Links */}
@@ -361,6 +463,26 @@ const StudentDashboard = () => {
           </div>
         </div>
       </div>
+
+      {/* QR Code Pass Modal */}
+      {selectedEventForQR && (
+        <QRCodeModal
+          isOpen={Boolean(selectedEventForQR)}
+          onClose={() => setSelectedEventForQR(null)}
+          event={selectedEventForQR}
+          registration={selectedEventForQR}
+        />
+      )}
+
+      {/* Participation Certificate Modal */}
+      {selectedEventForCert && (
+        <CertificateModal
+          isOpen={Boolean(selectedEventForCert)}
+          onClose={() => setSelectedEventForCert(null)}
+          event={selectedEventForCert}
+          studentName={user?.name}
+        />
+      )}
     </div>
   );
 };
