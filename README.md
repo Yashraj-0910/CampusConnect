@@ -216,45 +216,6 @@ flowchart TB
 🗃️ High-Level Data Relationships
 👥 Role-Based Access Control
 
-CampusConnect uses role-based authorization to ensure users only access functionality relevant to their responsibilities.
-
-Capability	🎓 Student	🏢 Coordinator	🛡️ Admin	👨‍🏫 Mentor
-Browse Clubs	✅	✅	✅	✅
-View Events	✅	✅	✅	✅
-Apply to Clubs	✅	❌	❌	❌
-Track Applications	✅	❌	❌	❌
-RSVP to Events	✅	❌	❌	❌
-Manage Club	❌	✅	✅	❌
-Review Applications	❌	✅	❌	❌
-Approve / Reject / Waitlist	❌	✅	❌	❌
-Create Club Events	❌	✅	❌	❌
-Club Announcements	❌	✅	❌	❌
-View Campus Analytics	❌	❌	✅	❌
-Assign Coordinators	❌	❌	✅	❌
-CRUD Clubs	❌	❌	✅	❌
-Ask Mentor Questions	✅	❌	❌	❌
-Answer Questions	❌	❌	❌	✅
-Freshman Roadmap	✅	❌	❌	❌
-🛠️ Technology Stack
-Layer	Technology	Purpose
-🎨 Frontend	React 19	Component-based UI
-⚡ Build Tool	Vite	Fast development & production builds
-🎨 Styling	Tailwind CSS v4	Utility-first responsive UI
-✨ Animations	Framer Motion	Page transitions & interactive animations
-🎯 Icons	Lucide React	Consistent icon system
-🧭 Routing	React Router DOM v7	Client-side navigation
-🌐 HTTP	Axios	REST API communication
-🔄 Realtime	Socket.IO Client	Live notifications
-🟢 Runtime	Node.js	Backend runtime
-🚂 Backend	Express.js	REST API server
-🐘 Database	PostgreSQL	Relational data storage
-🔗 ORM	Sequelize	Database abstraction
-🔄 Realtime	Socket.IO Server	WebSocket communication
-⏰ Scheduler	node-cron	Automated background jobs
-🔐 Authentication	JWT	Stateless authentication
-🔒 Password Security	bcryptjs	Password hashing
-📧 Email	Brevo API	Password reset emails
-📁 Uploads	Multer	File & banner uploads
 📁 Project Structure
 CampusConnect/
 │
