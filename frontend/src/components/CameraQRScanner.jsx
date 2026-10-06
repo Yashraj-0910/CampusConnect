@@ -51,8 +51,8 @@ export default function CameraQRScanner({ onScanSuccess, onClose }) {
         err.name === 'NotAllowedError'
           ? 'Camera permission was denied. Please allow camera permissions in your browser address bar.'
           : err.name === 'NotFoundError'
-          ? 'No camera device found on this system.'
-          : 'Unable to access camera. You can upload a QR image instead.'
+            ? 'No camera device found on this system.'
+            : 'Unable to access camera. You can upload a QR image instead.'
       );
       setIsScanning(false);
     }
