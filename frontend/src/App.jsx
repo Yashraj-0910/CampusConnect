@@ -6,6 +6,7 @@ import { SocketProvider } from './context/SocketContext';
 // Components & Layouts
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import MobileBottomNav from './components/MobileBottomNav';
 import ProtectedRoute from './components/ProtectedRoute';
 
 // Public Pages
@@ -36,9 +37,9 @@ function App() {
     <Router>
       <AuthProvider>
         <SocketProvider>
-          <div className="flex flex-col min-h-screen bg-[#0b0f19] text-white">
+          <div className="flex flex-col min-h-screen bg-[#f8fafc] text-slate-900 selection:bg-indigo-500 selection:text-white">
             <Navbar />
-            <main className="flex-grow">
+            <main className="flex-grow pb-20 md:pb-0">
               <Routes>
                 {/* Public Routes */}
                 <Route path="/" element={<Home />} />
@@ -114,6 +115,7 @@ function App() {
               </Routes>
             </main>
             <Footer />
+            <MobileBottomNav />
           </div>
         </SocketProvider>
       </AuthProvider>
@@ -122,3 +124,4 @@ function App() {
 }
 
 export default App;
+

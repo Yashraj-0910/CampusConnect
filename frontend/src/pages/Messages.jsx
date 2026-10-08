@@ -10,7 +10,8 @@ import {
   Loader2,
   ShieldCheck,
   Clock,
-  CheckCheck
+  CheckCheck,
+  ChevronLeft
 } from 'lucide-react';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
@@ -21,10 +22,12 @@ export default function Messages() {
   const { socket } = useSocket();
 
   const [activeTab, setActiveTab] = useState('direct'); // 'direct' | 'clubs'
+  const [mobileView, setMobileView] = useState('list'); // 'list' | 'chat'
   const [conversations, setConversations] = useState([]);
   const [myClubs, setMyClubs] = useState([]);
   const [selectedPartner, setSelectedPartner] = useState(null);
   const [selectedClub, setSelectedClub] = useState(null);
+
   const [messages, setMessages] = useState([]);
   const [loadingConv, setLoadingConv] = useState(true);
   const [loadingChat, setLoadingChat] = useState(false);
@@ -321,11 +324,13 @@ export default function Messages() {
       </div>
 
       {/* Main Messaging Box */}
-      <div className="bg-slate-900/90 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden grid grid-cols-1 lg:grid-cols-12 h-[720px]">
+      <div className="bg-slate-900/90 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden grid grid-cols-1 lg:grid-cols-12 min-h-[500px] h-[calc(100vh-180px)] max-h-[760px]">
         {/* Left Sidebar (Conversations / Club list) */}
-        <div className="lg:col-span-4 border-r border-slate-800 flex flex-col bg-slate-950/60">
+        <div className={`lg:col-span-4 border-r border-slate-800 flex flex-col bg-slate-950/60 ${
+          mobileView === 'chat' ? 'hidden lg:flex' : 'flex'
+        }`}>
           {/* Search Box */}
-          <div className="p-4 border-b border-slate-800/80">
+          <div className="p-3 sm:p-4 border-b border-slate-800/80">
             <div className="relative">
               <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
               <input
@@ -356,13 +361,16 @@ export default function Messages() {
                   return (
                     <button
                       key={c.user.id}
-                      onClick={() => setSelectedPartner(c.user)}
-                      className={`w-full text-left p-4 flex items-center space-x-3.5 transition ${
+                      onClick={() => {
+                        setSelectedPartner(c.user);
+                        setMobileView('chat');
+                      }}
+                      className={`w-full text-left p-3.5 sm:p-4 flex items-center space-x-3.5 transition cursor-pointer ${
                         isSelected ? 'bg-indigo-600/15 border-l-4 border-indigo-500' : 'hover:bg-slate-900/60'
                       }`}
                     >
                       <div className="relative flex-shrink-0">
-                        <div className="w-11 h-11 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center font-bold text-indigo-400">
+                        <div className="w-10 sm:w-11 h-10 sm:h-11 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center font-bold text-indigo-400 text-sm">
                           {c.user.name?.charAt(0) || 'U'}
                         </div>
                         <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 rounded-full border-2 border-slate-950" />
@@ -399,14 +407,17 @@ export default function Messages() {
                   return (
                     <button
                       key={club.id}
-                      onClick={() => setSelectedClub(club)}
-                      className={`w-full text-left p-4 flex items-center space-x-3.5 transition ${
+                      onClick={() => {
+                        setSelectedClub(club);
+                        setMobileView('chat');
+                      }}
+                      className={`w-full text-left p-3.5 sm:p-4 flex items-center space-x-3.5 transition cursor-pointer ${
                         isSelected ? 'bg-indigo-600/15 border-l-4 border-indigo-500' : 'hover:bg-slate-900/60'
                       }`}
                     >
-                      <div className="w-11 h-11 rounded-xl bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center font-bold text-indigo-400 flex-shrink-0">
+                      <div className="w-10 sm:w-11 h-10 sm:h-11 rounded-xl bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center font-bold text-indigo-400 flex-shrink-0">
                         {club.logo_url ? (
-                          <img src={club.logo_url} alt={club.name} className="w-11 h-11 rounded-xl object-cover" />
+                          <img src={club.logo_url} alt={club.name} className="w-10 sm:w-11 h-10 sm:h-11 rounded-xl object-cover" />
                         ) : (
                           <Users className="w-5 h-5" />
                         )}
@@ -426,40 +437,55 @@ export default function Messages() {
         </div>
 
         {/* Right Chat Canvas */}
-        <div className="lg:col-span-8 flex flex-col h-full bg-slate-950/30">
+        <div className={`lg:col-span-8 flex flex-col h-full bg-slate-950/30 ${
+          mobileView === 'list' ? 'hidden lg:flex' : 'flex'
+        }`}>
           {/* Top Active Chat Bar */}
-          <div className="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/90">
-            {activeTab === 'direct' && selectedPartner ? (
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 rounded-xl bg-indigo-500/20 text-indigo-400 font-bold flex items-center justify-center border border-indigo-500/30">
-                  {selectedPartner.name?.charAt(0)}
-                </div>
-                <div>
-                  <h3 className="font-bold text-sm text-white">{selectedPartner.name}</h3>
-                  <div className="flex items-center space-x-2 text-xs text-slate-400">
-                    <span className="inline-flex items-center text-emerald-400 font-medium text-[11px]">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5 animate-pulse" />
-                      Online
-                    </span>
-                    <span>•</span>
-                    <span className="capitalize">{selectedPartner.role}</span>
+          <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/90">
+            <div className="flex items-center space-x-2 sm:space-x-3 min-w-0">
+              {/* Back to List button on mobile */}
+              <button
+                type="button"
+                onClick={() => setMobileView('list')}
+                className="lg:hidden p-1.5 -ml-1 rounded-xl bg-slate-800/90 text-slate-300 hover:text-white flex items-center gap-1 text-xs font-bold transition"
+                title="Back to conversation list"
+              >
+                <ChevronLeft className="w-5 h-5 text-indigo-400" />
+              </button>
+
+              {activeTab === 'direct' && selectedPartner ? (
+                <div className="flex items-center space-x-2.5 sm:space-x-3 min-w-0">
+                  <div className="w-9 sm:w-10 h-9 sm:h-10 rounded-xl bg-indigo-500/20 text-indigo-400 font-bold flex items-center justify-center border border-indigo-500/30 shrink-0 text-sm">
+                    {selectedPartner.name?.charAt(0)}
+                  </div>
+                  <div className="min-w-0">
+                    <h3 className="font-bold text-sm text-white truncate">{selectedPartner.name}</h3>
+                    <div className="flex items-center space-x-2 text-[11px] text-slate-400 truncate">
+                      <span className="inline-flex items-center text-emerald-400 font-medium">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1 animate-pulse" />
+                        Online
+                      </span>
+                      <span>•</span>
+                      <span className="capitalize truncate">{selectedPartner.role}</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ) : activeTab === 'clubs' && selectedClub ? (
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center border border-indigo-500/30">
-                  <Users className="w-5 h-5" />
+              ) : activeTab === 'clubs' && selectedClub ? (
+                <div className="flex items-center space-x-2.5 sm:space-x-3 min-w-0">
+                  <div className="w-9 sm:w-10 h-9 sm:h-10 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center border border-indigo-500/30 shrink-0">
+                    <Users className="w-4 sm:w-5 h-4 sm:h-5" />
+                  </div>
+                  <div className="min-w-0">
+                    <h3 className="font-bold text-sm text-white truncate">{selectedClub.name}</h3>
+                    <p className="text-[11px] text-indigo-300 font-medium truncate">Channel</p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-bold text-sm text-white">{selectedClub.name} Channel</h3>
-                  <p className="text-xs text-indigo-300 font-medium">All verified members & coordinators</p>
-                </div>
-              </div>
-            ) : (
-              <div className="text-sm text-slate-400 font-medium">Select a conversation to start chatting</div>
-            )}
+              ) : (
+                <div className="text-xs sm:text-sm text-slate-400 font-medium">Select a conversation</div>
+              )}
+            </div>
           </div>
+
 
           {/* Messages Stream */}
           <div className="flex-1 overflow-y-auto p-6 space-y-3 bg-gradient-to-b from-slate-900/40 to-slate-950/80">

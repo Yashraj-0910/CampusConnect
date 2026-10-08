@@ -132,29 +132,37 @@ export default function CertificateModal({ isOpen, onClose, event, studentName }
           className="relative w-full max-w-3xl my-8 bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl overflow-hidden text-white"
         >
           {/* Action Bar */}
-          <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-950">
-            <div className="flex items-center space-x-2 text-amber-400">
-              <Award className="w-5 h-5" />
-              <span className="font-semibold text-sm tracking-wide uppercase">Verified Credential</span>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 sm:px-6 py-3 sm:py-4 border-b border-slate-800 bg-slate-950">
+            <div className="flex items-center justify-between w-full sm:w-auto">
+              <div className="flex items-center space-x-2 text-amber-400">
+                <Award className="w-5 h-5 shrink-0" />
+                <span className="font-semibold text-xs sm:text-sm tracking-wide uppercase">Verified Credential</span>
+              </div>
+              <button
+                onClick={onClose}
+                className="sm:hidden p-1.5 rounded-lg text-slate-400 hover:text-white bg-slate-800/80 transition cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
             </div>
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-2 sm:space-x-3 w-full sm:w-auto justify-end">
               <button
                 onClick={downloadCertificate}
-                className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-lg shadow-indigo-600/30 transition"
+                className="flex-1 sm:flex-none flex items-center justify-center space-x-1.5 px-3 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-lg shadow-indigo-600/30 transition cursor-pointer min-h-[38px]"
               >
                 <Download className="w-3.5 h-3.5" />
-                <span>Download High-Res</span>
+                <span>Save Certificate</span>
               </button>
               <button
                 onClick={printCertificate}
-                className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition"
+                className="hidden sm:flex items-center space-x-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition cursor-pointer min-h-[38px]"
               >
                 <Printer className="w-3.5 h-3.5" />
                 <span>Print</span>
               </button>
               <button
                 onClick={onClose}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-white bg-slate-800/80 hover:bg-slate-700 transition"
+                className="hidden sm:block p-2 rounded-xl text-slate-400 hover:text-white bg-slate-800/80 hover:bg-slate-700 transition cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -162,16 +170,17 @@ export default function CertificateModal({ isOpen, onClose, event, studentName }
           </div>
 
           {/* Certificate Viewport */}
-          <div className="p-6 md:p-8 flex justify-center bg-slate-950/60">
+          <div className="p-3 sm:p-6 md:p-8 flex justify-center bg-slate-950/60 overflow-x-auto">
             <div
               ref={certificateRef}
-              className="relative w-full aspect-[1.45/1] rounded-xl border-4 border-amber-500/80 bg-gradient-to-br from-slate-900 via-slate-950 to-indigo-950/80 p-6 md:p-8 flex flex-col justify-between shadow-2xl shadow-amber-500/5 text-center overflow-hidden"
+              className="relative w-full min-w-[310px] aspect-[1.45/1] rounded-xl border-2 sm:border-4 border-amber-500/80 bg-gradient-to-br from-slate-900 via-slate-950 to-indigo-950/80 p-4 sm:p-6 md:p-8 flex flex-col justify-between shadow-2xl shadow-amber-500/5 text-center overflow-hidden"
             >
               {/* Decorative Corner Ornaments */}
-              <div className="absolute top-2 left-2 w-8 h-8 border-t-2 border-l-2 border-amber-400/80" />
-              <div className="absolute top-2 right-2 w-8 h-8 border-t-2 border-r-2 border-amber-400/80" />
-              <div className="absolute bottom-2 left-2 w-8 h-8 border-b-2 border-l-2 border-amber-400/80" />
-              <div className="absolute bottom-2 right-2 w-8 h-8 border-b-2 border-r-2 border-amber-400/80" />
+              <div className="absolute top-2 left-2 w-5 sm:w-8 h-5 sm:h-8 border-t-2 border-l-2 border-amber-400/80" />
+              <div className="absolute top-2 right-2 w-5 sm:w-8 h-5 sm:h-8 border-t-2 border-r-2 border-amber-400/80" />
+              <div className="absolute bottom-2 left-2 w-5 sm:w-8 h-5 sm:h-8 border-b-2 border-l-2 border-amber-400/80" />
+              <div className="absolute bottom-2 right-2 w-5 sm:w-8 h-5 sm:h-8 border-b-2 border-r-2 border-amber-400/80" />
+
 
               {/* Watermark Logo */}
               <div className="absolute inset-0 flex items-center justify-center opacity-5 pointer-events-none">

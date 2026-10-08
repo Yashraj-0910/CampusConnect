@@ -158,27 +158,27 @@ export default function CameraQRScanner({ onScanSuccess, onClose }) {
   };
 
   return (
-    <div className="p-6 rounded-2xl bg-slate-900 border border-slate-800 text-white shadow-xl relative overflow-hidden">
+    <div className="p-4 sm:p-6 rounded-2xl bg-slate-900 border border-slate-800 text-white shadow-xl relative overflow-hidden">
       {onClose && (
         <button
           onClick={() => {
             stopCamera();
             onClose();
           }}
-          className="absolute top-4 right-4 p-1.5 rounded-lg text-slate-400 hover:text-white bg-slate-800 transition"
+          className="absolute top-3.5 right-3.5 p-1.5 rounded-lg text-slate-400 hover:text-white bg-slate-800 transition cursor-pointer"
         >
           <X className="w-5 h-5" />
         </button>
       )}
 
       {/* Header */}
-      <div className="flex items-center space-x-3 mb-4">
-        <div className="p-2.5 rounded-xl bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
-          <Camera className="w-6 h-6" />
+      <div className="flex items-center space-x-3 mb-4 pr-8">
+        <div className="p-2 sm:p-2.5 rounded-xl bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 shrink-0">
+          <Camera className="w-5 sm:w-6 h-5 sm:h-6" />
         </div>
         <div>
-          <h3 className="font-bold text-base text-white">Live Camera QR Scanner</h3>
-          <p className="text-xs text-slate-400">Point webcam or phone camera at the student's entry pass</p>
+          <h3 className="font-bold text-sm sm:text-base text-white">Live Camera QR Scanner</h3>
+          <p className="text-[11px] sm:text-xs text-slate-400">Scan student entry pass or upload ticket</p>
         </div>
       </div>
 
@@ -191,7 +191,7 @@ export default function CameraQRScanner({ onScanSuccess, onClose }) {
 
       {/* Scanner Viewport */}
       <div className="flex flex-col items-center justify-center">
-        <div className="w-full max-w-[340px] aspect-square rounded-2xl overflow-hidden bg-slate-950 border-2 border-slate-700 relative flex items-center justify-center shadow-inner">
+        <div className="w-full max-w-[280px] sm:max-w-[340px] aspect-square rounded-2xl overflow-hidden bg-slate-950 border-2 border-slate-700 relative flex items-center justify-center shadow-inner">
           {/* Direct Video Element */}
           <video
             ref={videoRef}
@@ -205,48 +205,48 @@ export default function CameraQRScanner({ onScanSuccess, onClose }) {
 
           {/* Laser Scanning Animation Overlay */}
           {isScanning && (
-            <div className="absolute inset-0 pointer-events-none flex flex-col justify-between p-6">
+            <div className="absolute inset-0 pointer-events-none flex flex-col justify-between p-5 sm:p-6">
               {/* Corner targeting reticles */}
               <div className="flex justify-between">
-                <div className="w-6 h-6 border-t-2 border-l-2 border-emerald-400" />
-                <div className="w-6 h-6 border-t-2 border-r-2 border-emerald-400" />
+                <div className="w-5 sm:w-6 h-5 sm:h-6 border-t-2 border-l-2 border-emerald-400" />
+                <div className="w-5 sm:w-6 h-5 sm:h-6 border-t-2 border-r-2 border-emerald-400" />
               </div>
 
               {/* Animated laser line */}
               <div className="w-full h-0.5 bg-gradient-to-r from-transparent via-emerald-400 to-transparent animate-bounce shadow-lg shadow-emerald-400/50" />
 
               <div className="flex justify-between">
-                <div className="w-6 h-6 border-b-2 border-l-2 border-emerald-400" />
-                <div className="w-6 h-6 border-b-2 border-r-2 border-emerald-400" />
+                <div className="w-5 sm:w-6 h-5 sm:h-6 border-b-2 border-l-2 border-emerald-400" />
+                <div className="w-5 sm:w-6 h-5 sm:h-6 border-b-2 border-r-2 border-emerald-400" />
               </div>
             </div>
           )}
 
           {/* Idle State */}
           {!isScanning && !scannedCode && (
-            <div className="text-center p-6 text-slate-500">
-              <Camera className="w-12 h-12 mx-auto mb-2 text-slate-600" />
+            <div className="text-center p-4 sm:p-6 text-slate-500">
+              <Camera className="w-10 sm:w-12 h-10 sm:h-12 mx-auto mb-2 text-slate-600" />
               <p className="text-xs font-semibold text-slate-400">Camera is ready</p>
-              <p className="text-[11px] text-slate-500 mt-1">Click "Start Camera" to begin scanning</p>
+              <p className="text-[11px] text-slate-500 mt-1">Tap "Start Camera" to scan passes</p>
             </div>
           )}
 
           {/* Scanned Success Preview */}
           {scannedCode && !isScanning && (
-            <div className="text-center p-6 text-emerald-400 space-y-2">
-              <CheckCircle2 className="w-12 h-12 mx-auto text-emerald-400 animate-pulse" />
+            <div className="text-center p-4 sm:p-6 text-emerald-400 space-y-2">
+              <CheckCircle2 className="w-10 sm:w-12 h-10 sm:h-12 mx-auto text-emerald-400 animate-pulse" />
               <p className="text-xs font-bold text-white">QR Code Recognized!</p>
-              <p className="text-[10px] font-mono text-emerald-300 truncate max-w-[240px]">{scannedCode}</p>
+              <p className="text-[10px] font-mono text-emerald-300 truncate max-w-[220px]">{scannedCode}</p>
             </div>
           )}
         </div>
 
         {/* Controls */}
-        <div className="mt-5 flex flex-wrap gap-3 w-full justify-center">
+        <div className="mt-4 sm:mt-5 flex flex-col sm:flex-row gap-2.5 sm:gap-3 w-full max-w-[280px] sm:max-w-[340px] justify-center">
           {!isScanning ? (
             <button
               onClick={startCamera}
-              className="flex items-center space-x-2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition shadow-lg shadow-indigo-600/30"
+              className="flex-1 flex items-center justify-center space-x-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition shadow-lg shadow-indigo-600/30 cursor-pointer min-h-[42px]"
             >
               <Camera className="w-4 h-4" />
               <span>Start Camera Scanner</span>
@@ -254,7 +254,7 @@ export default function CameraQRScanner({ onScanSuccess, onClose }) {
           ) : (
             <button
               onClick={stopCamera}
-              className="flex items-center space-x-2 px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold transition shadow-lg shadow-rose-600/30"
+              className="flex-1 flex items-center justify-center space-x-2 px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold transition shadow-lg shadow-rose-600/30 cursor-pointer min-h-[42px]"
             >
               <CameraOff className="w-4 h-4" />
               <span>Stop Camera</span>
@@ -262,9 +262,9 @@ export default function CameraQRScanner({ onScanSuccess, onClose }) {
           )}
 
           {/* Upload Image fallback */}
-          <label className="flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition cursor-pointer border border-slate-700">
+          <label className="flex items-center justify-center space-x-2 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition cursor-pointer border border-slate-700 min-h-[42px]">
             <Upload className="w-4 h-4" />
-            <span>Upload QR Image</span>
+            <span>Upload Image</span>
             <input
               type="file"
               accept="image/*"
@@ -277,3 +277,4 @@ export default function CameraQRScanner({ onScanSuccess, onClose }) {
     </div>
   );
 }
+

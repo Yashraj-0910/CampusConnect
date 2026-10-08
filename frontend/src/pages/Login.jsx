@@ -155,7 +155,7 @@ const Login = () => {
             <button
               type="submit"
               disabled={loading}
-              className="mt-2 w-full rounded-2xl bg-gradient-to-r from-indigo-600 via-violet-600 to-indigo-600 py-3.5 text-sm font-bold text-white shadow-lg shadow-indigo-600/20 hover:shadow-indigo-600/35 hover:opacity-95 transition-all duration-200 disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
+              className="mt-2 w-full rounded-2xl bg-gradient-to-r from-indigo-600 via-violet-600 to-indigo-600 py-3.5 text-sm font-bold text-white shadow-lg shadow-indigo-600/20 hover:shadow-indigo-600/35 hover:opacity-95 transition-all duration-200 disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2 min-h-[44px]"
             >
               {loading ? (
                 <div className="h-5 w-5 animate-spin rounded-full border-2 border-t-white border-white/20" />
@@ -167,8 +167,37 @@ const Login = () => {
               )}
             </button>
           </form>
+
+          {/* Quick Demo Access Buttons */}
+          <div className="mt-8 pt-6 border-t border-slate-100 text-center">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-3">Quick Demo 1-Tap Sign In</p>
+            <div className="grid grid-cols-3 gap-2">
+              <button
+                type="button"
+                onClick={() => { setEmail('student@campuscompass.edu'); setPassword('studentpassword'); }}
+                className="py-2 px-1 rounded-xl bg-indigo-50 hover:bg-indigo-100 border border-indigo-200/80 text-[11px] font-bold text-indigo-700 transition cursor-pointer"
+              >
+                Student
+              </button>
+              <button
+                type="button"
+                onClick={() => { setEmail('coordinator@campuscompass.edu'); setPassword('coordinatorpassword'); }}
+                className="py-2 px-1 rounded-xl bg-violet-50 hover:bg-violet-100 border border-violet-200/80 text-[11px] font-bold text-violet-700 transition cursor-pointer"
+              >
+                Coordinator
+              </button>
+              <button
+                type="button"
+                onClick={() => { setEmail('admin@campuscompass.edu'); setPassword('adminpassword'); }}
+                className="py-2 px-1 rounded-xl bg-cyan-50 hover:bg-cyan-100 border border-cyan-200/80 text-[11px] font-bold text-cyan-700 transition cursor-pointer"
+              >
+                Admin
+              </button>
+            </div>
+          </div>
         </div>
       </div>
+
 
       {/* Forgot Password Modal */}
       {forgotModalOpen && (

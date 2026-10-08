@@ -158,13 +158,13 @@ const ClubDetails = () => {
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3 w-full md:w-auto">
               <button
                 onClick={() => {
                   if (!user) return alert('Please sign in to join the club channel!');
                   setChatOpen(true);
                 }}
-                className="rounded-2xl border border-indigo-200 bg-indigo-50 hover:bg-indigo-100 px-5 py-3.5 text-xs font-bold text-indigo-700 transition flex items-center gap-2"
+                className="rounded-2xl border border-indigo-200 bg-indigo-50 hover:bg-indigo-100 px-5 py-3 text-xs font-bold text-indigo-700 transition flex items-center justify-center gap-2 cursor-pointer min-h-[42px]"
               >
                 <MessageSquare className="w-4 h-4" />
                 <span>Club Lounge</span>
@@ -176,18 +176,19 @@ const ClubDetails = () => {
                     if (!user) return alert('Please sign in to apply to this club!');
                     setModalOpen(true);
                   }}
-                  className="rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 px-7 py-3.5 text-xs font-bold text-white shadow-lg shadow-indigo-600/20 hover:opacity-95 transition-all cursor-pointer flex items-center gap-2"
+                  className="rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 px-6 py-3 text-xs font-bold text-white shadow-lg shadow-indigo-600/20 hover:opacity-95 transition-all cursor-pointer flex items-center justify-center gap-2 min-h-[42px]"
                 >
                   <Sparkles className="h-4 w-4 text-cyan-200" />
                   <span>Apply for Membership</span>
                 </button>
               ) : (
-                <span className="rounded-2xl bg-slate-100 border border-slate-200 px-6 py-3 text-xs font-bold text-slate-500">
+                <span className="rounded-2xl bg-slate-100 border border-slate-200 px-6 py-3 text-xs font-bold text-slate-500 text-center">
                   Applications Closed
                 </span>
               )}
             </div>
           </div>
+
         </div>
 
         {/* Content Details Grid */}
@@ -323,26 +324,27 @@ const ClubDetails = () => {
       {/* Application Modal */}
       <AnimatePresence>
         {modalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-3 sm:p-4 overflow-y-auto">
             <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="w-full max-w-lg rounded-3xl bg-white border border-slate-200 p-8 shadow-2xl relative"
+              initial={{ opacity: 0, scale: 0.95, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 15 }}
+              className="w-full max-w-lg rounded-3xl bg-white border border-slate-200 p-5 sm:p-8 shadow-2xl relative max-h-[90vh] overflow-y-auto my-auto"
             >
               <button
                 onClick={() => setModalOpen(false)}
-                className="absolute top-6 right-6 text-slate-400 hover:text-slate-600"
+                className="absolute top-4 sm:top-6 right-4 sm:right-6 p-1 rounded-xl text-slate-400 hover:text-slate-600 bg-slate-100 cursor-pointer"
               >
                 <X className="h-5 w-5" />
               </button>
 
-              <h3 className="font-['Space_Grotesk'] text-xl font-bold text-slate-900 mb-1">
+              <h3 className="font-['Space_Grotesk'] text-lg sm:text-xl font-bold text-slate-900 mb-1 pr-8">
                 Apply for {club.name}
               </h3>
-              <p className="text-xs text-slate-500 mb-6 font-medium">
+              <p className="text-xs text-slate-500 mb-5 sm:mb-6 font-medium">
                 Tell the coordinators about your background, skills, and weekly availability.
               </p>
+
 
               {submitError && (
                 <div className="rounded-2xl bg-rose-50 border border-rose-200 p-3.5 text-xs text-rose-700 mb-4 flex items-center gap-2">

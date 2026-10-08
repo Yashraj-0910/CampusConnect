@@ -38,13 +38,13 @@ const Navbar = () => {
   const unreadCount = notifications?.filter(n => !n.is_read)?.length || 0;
 
   const navLinks = [
-    { name: 'Explore Clubs', path: '/explore', icon: Compass },
+    { name: 'Clubs', path: '/explore', icon: Compass },
     { name: 'Events', path: '/events', icon: Calendar },
     { name: 'Venues', path: '/venues', icon: Building2 },
     { name: 'Roadmap', path: '/roadmap', icon: Map },
     { name: 'Mentors', path: '/mentors', icon: Users },
-    ...(user ? [{ name: 'Messages', path: '/messages', icon: MessageSquare }] : []),
-    { name: 'FAQs', path: '/faq', icon: HelpCircle },
+    ...(user ? [{ name: 'Chat', path: '/messages', icon: MessageSquare }] : []),
+    { name: 'FAQ', path: '/faq', icon: HelpCircle },
   ];
 
   const getDashboardPath = () => {
@@ -56,28 +56,28 @@ const Navbar = () => {
 
   return (
     <header className="sticky top-0 z-50 w-full glass-nav transition-all duration-300">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex h-18 items-center justify-between">
+      <div className="mx-auto max-w-7xl px-3 sm:px-5 lg:px-6">
+        <div className="flex h-16 items-center justify-between gap-2">
           
           {/* Logo Brand */}
-          <Link to="/" className="flex items-center gap-3 group">
-            <div className="relative flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-tr from-indigo-600 via-violet-600 to-cyan-500 p-[1.5px] shadow-md shadow-indigo-500/20 group-hover:scale-105 transition-all duration-300">
-              <div className="flex h-full w-full items-center justify-center rounded-[14px] bg-white">
-                <Sparkles className="h-5 w-5 text-indigo-600 group-hover:rotate-12 transition-all duration-300" />
+          <Link to="/" className="flex items-center gap-2 group flex-shrink-0">
+            <div className="relative flex h-8.5 w-8.5 xl:h-9 xl:w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-indigo-600 via-violet-600 to-cyan-500 p-[1.5px] shadow-sm shadow-indigo-500/20 group-hover:scale-105 transition-all duration-300">
+              <div className="flex h-full w-full items-center justify-center rounded-[10px] bg-white">
+                <Sparkles className="h-4 w-4 xl:h-4.5 xl:w-4.5 text-indigo-600 group-hover:rotate-12 transition-all duration-300" />
               </div>
             </div>
             <div className="flex flex-col">
-              <span className="font-['Space_Grotesk'] text-xl font-bold tracking-tight text-slate-900 flex items-center gap-1">
+              <span className="font-['Space_Grotesk'] text-base xl:text-lg font-bold tracking-tight text-slate-900 flex items-center gap-0.5">
                 Campus<span className="text-gradient-primary font-extrabold">Connect</span>
               </span>
-              <span className="text-[10px] font-bold tracking-widest uppercase text-indigo-600 -mt-1">
-                Student Community Hub
+              <span className="text-[9px] font-bold tracking-wider uppercase text-indigo-600 -mt-1 hidden sm:block">
+                Student Hub
               </span>
             </div>
           </Link>
 
           {/* Desktop Navigation Links */}
-          <nav className="hidden lg:flex items-center gap-1.5 rounded-full border border-slate-200/80 bg-slate-100/70 p-1.5 backdrop-blur-md">
+          <nav className="hidden lg:flex items-center gap-0.5 xl:gap-1 rounded-full border border-slate-200/80 bg-slate-100/70 p-1 backdrop-blur-md">
             {navLinks.map((link) => {
               const isActive = location.pathname === link.path;
               const Icon = link.icon;
@@ -85,7 +85,7 @@ const Navbar = () => {
                 <Link
                   key={link.path}
                   to={link.path}
-                  className={`relative flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200 ${
+                  className={`relative flex items-center gap-1.5 rounded-full px-2.5 xl:px-3.5 py-1.5 text-xs font-bold transition-all duration-200 ${
                     isActive
                       ? 'text-indigo-700 font-bold'
                       : 'text-slate-600 hover:text-slate-950 hover:bg-white/80'
@@ -94,11 +94,11 @@ const Navbar = () => {
                   {isActive && (
                     <motion.div
                       layoutId="nav-pill-active-light"
-                      className="absolute inset-0 rounded-full bg-white shadow-sm border border-slate-200/80"
+                      className="absolute inset-0 rounded-full bg-white shadow-xs border border-slate-200/80"
                       transition={{ type: 'spring', stiffness: 350, damping: 30 }}
                     />
                   )}
-                  <Icon className={`relative z-10 h-4 w-4 ${isActive ? 'text-indigo-600' : 'text-slate-500'}`} />
+                  <Icon className={`relative z-10 h-3.5 w-3.5 ${isActive ? 'text-indigo-600' : 'text-slate-500'}`} />
                   <span className="relative z-10">{link.name}</span>
                 </Link>
               );
@@ -106,18 +106,18 @@ const Navbar = () => {
           </nav>
 
           {/* Right Action Section */}
-          <div className="hidden md:flex items-center gap-3">
+          <div className="hidden md:flex items-center gap-2 xl:gap-2.5 flex-shrink-0">
             {user ? (
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
                 {/* Notifications Link */}
                 <Link
                   to={getDashboardPath()}
-                  className="relative flex h-10 w-10 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900 shadow-sm transition-all"
+                  className="relative flex h-8.5 w-8.5 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900 shadow-xs transition-all"
                   title="Notifications"
                 >
-                  <Bell className="h-4.5 w-4.5" />
+                  <Bell className="h-4 w-4" />
                   {unreadCount > 0 && (
-                    <span className="absolute -top-1 -right-1 flex h-4.5 w-4.5 items-center justify-center rounded-full bg-rose-500 text-[10px] font-bold text-white shadow-md animate-pulse">
+                    <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-[9px] font-bold text-white shadow-sm animate-pulse">
                       {unreadCount}
                     </span>
                   )}
@@ -126,9 +126,9 @@ const Navbar = () => {
                 {/* Dashboard Quick Button */}
                 <Link
                   to={getDashboardPath()}
-                  className="flex items-center gap-2 rounded-2xl border border-indigo-200 bg-indigo-50 hover:bg-indigo-100 px-4 py-2 text-xs font-bold text-indigo-700 transition-all duration-200 shadow-sm"
+                  className="flex items-center gap-1.5 rounded-xl border border-indigo-200 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 text-xs font-bold text-indigo-700 transition-all duration-200 shadow-xs"
                 >
-                  <LayoutDashboard className="h-4 w-4" />
+                  <LayoutDashboard className="h-3.5 w-3.5" />
                   <span>Dashboard</span>
                 </Link>
 
@@ -136,15 +136,15 @@ const Navbar = () => {
                 <div className="relative">
                   <button
                     onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                    className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-white p-1.5 pr-3 hover:bg-slate-50 shadow-sm transition-all cursor-pointer"
+                    className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white p-1 pr-2.5 hover:bg-slate-50 shadow-xs transition-all cursor-pointer"
                   >
-                    <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-600 text-xs font-bold text-white shadow-sm">
+                    <div className="flex h-6.5 w-6.5 items-center justify-center rounded-lg bg-gradient-to-tr from-indigo-600 to-violet-600 text-[11px] font-bold text-white shadow-xs">
                       {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
                     </div>
-                    <span className="text-xs font-bold text-slate-800 max-w-[90px] truncate">
+                    <span className="text-xs font-bold text-slate-800 max-w-[70px] xl:max-w-[90px] truncate">
                       {user.name || user.email?.split('@')[0]}
                     </span>
-                    <ChevronDown className="h-3.5 w-3.5 text-slate-400" />
+                    <ChevronDown className="h-3 w-3 text-slate-400" />
                   </button>
 
                   <AnimatePresence>

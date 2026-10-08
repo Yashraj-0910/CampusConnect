@@ -117,20 +117,20 @@ const EventDetails = () => {
                 </h1>
               </div>
 
-              <div>
+              <div className="w-full sm:w-auto">
                 {registeredSuccess ? (
-                  <span className="inline-flex items-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-6 py-3.5 text-xs font-bold text-emerald-700 shadow-sm">
+                  <span className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-6 py-3.5 text-xs font-bold text-emerald-700 shadow-sm">
                     <CheckCircle2 className="h-4.5 w-4.5 text-emerald-600" /> Confirmed Registered
                   </span>
                 ) : isDeadlinePassed ? (
-                  <span className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-slate-100 px-6 py-3 text-xs font-bold text-slate-500">
+                  <span className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-slate-100 px-6 py-3 text-xs font-bold text-slate-500">
                     Registration Closed
                   </span>
                 ) : (
                   <button
                     onClick={handleRegister}
                     disabled={registering}
-                    className="rounded-2xl bg-gradient-to-r from-violet-600 to-indigo-600 px-8 py-4 text-xs sm:text-sm font-bold text-white shadow-lg shadow-violet-600/20 hover:opacity-95 transition-all cursor-pointer disabled:opacity-50 flex items-center gap-2"
+                    className="w-full sm:w-auto rounded-2xl bg-gradient-to-r from-violet-600 to-indigo-600 px-8 py-3.5 text-xs sm:text-sm font-bold text-white shadow-lg shadow-violet-600/20 hover:opacity-95 transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2 min-h-[44px]"
                   >
                     <Sparkles className="h-4 w-4 text-cyan-200" />
                     <span>{registering ? 'Securing Spot...' : 'Register for Event'}</span>
@@ -138,6 +138,7 @@ const EventDetails = () => {
                 )}
               </div>
             </div>
+
 
             {error && (
               <div className="mb-6 flex items-center gap-3 rounded-2xl bg-rose-50 border border-rose-200 p-4 text-xs text-rose-700 font-medium">

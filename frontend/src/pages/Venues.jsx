@@ -221,12 +221,12 @@ export default function Venues() {
         </div>
 
         {/* Type Pill Selector */}
-        <div className="flex flex-wrap gap-2 w-full md:w-auto">
+        <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none w-full md:w-auto">
           {venueTypes.map((type) => (
             <button
               key={type}
               onClick={() => setSelectedType(type)}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold capitalize transition ${
+              className={`shrink-0 px-3.5 py-1.5 rounded-xl text-xs font-semibold capitalize transition cursor-pointer ${
                 selectedType === type
                   ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
                   : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white'
@@ -314,7 +314,7 @@ export default function Venues() {
                 <div className="mt-6 pt-4 border-t border-slate-800">
                   <button
                     onClick={() => handleOpenBooking(venue)}
-                    className="w-full flex items-center justify-center space-x-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition shadow-lg shadow-indigo-600/30"
+                    className="w-full flex items-center justify-center space-x-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition shadow-lg shadow-indigo-600/30 cursor-pointer min-h-[42px]"
                   >
                     <Plus className="w-4 h-4" />
                     <span>Reserve Slot for Event</span>
@@ -329,20 +329,21 @@ export default function Venues() {
       {/* Venue Booking Modal */}
       <AnimatePresence>
         {isBookingOpen && selectedVenue && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-sm overflow-y-auto">
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 15 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 15 }}
-              className="relative w-full max-w-lg bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl p-6 text-white"
+              className="relative w-full max-w-lg bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl p-5 sm:p-6 text-white max-h-[90vh] overflow-y-auto my-auto"
             >
               {/* Close */}
               <button
                 onClick={() => setIsBookingOpen(false)}
-                className="absolute top-4 right-4 p-1.5 rounded-lg text-slate-400 hover:text-white bg-slate-800/80 hover:bg-slate-700 transition"
+                className="absolute top-4 right-4 p-1.5 rounded-lg text-slate-400 hover:text-white bg-slate-800/80 hover:bg-slate-700 transition cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
+
 
               {/* Title */}
               <div className="flex items-center space-x-3 mb-4">

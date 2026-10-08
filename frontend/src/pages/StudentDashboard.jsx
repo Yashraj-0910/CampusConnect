@@ -13,6 +13,11 @@ import {
   CheckCircle2,
   Clock,
   ChevronRight,
+  ChevronDown,
+  ChevronUp,
+  Filter,
+  Megaphone,
+  Radio,
   TrendingUp,
   Bookmark,
   QrCode,
@@ -21,7 +26,7 @@ import {
   Download
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import API from '../services/api';
 import QRCodeModal from '../components/QRCodeModal';
 import CertificateModal from '../components/CertificateModal';
@@ -36,6 +41,12 @@ const StudentDashboard = () => {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // Bulletins Dropdown & Accordion state
+  const [bulletinsExpanded, setBulletinsExpanded] = useState(true);
+  const [bulletinFilter, setBulletinFilter] = useState('all');
+  const [expandedBulletinId, setExpandedBulletinId] = useState(null);
+  const [filterDropdownOpen, setFilterDropdownOpen] = useState(false);
+
   // Modals
   const [selectedEventForQR, setSelectedEventForQR] = useState(null);
   const [selectedEventForCert, setSelectedEventForCert] = useState(null);
@@ -47,7 +58,7 @@ const StudentDashboard = () => {
         const appsRes = await API.get('/clubs/registrations');
         const eventsRes = await API.get('/events?limit=5');
         const regEventsRes = await API.get('/events/registered');
-        const annRes = await API.get('/announcements?limit=5');
+        const annRes = await API.get('/announcements?limit=20');
         const notifRes = await API.get('/notifications');
 
         setClubs(clubsRes.data.clubs || []);
@@ -405,34 +416,230 @@ const StudentDashboard = () => {
 
           {/* Sidebar: Bulletins & Quick Links */}
           <div className="space-y-6">
-            <div className="glass-card rounded-3xl p-6 border border-slate-200 shadow-sm bg-white">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-['Space_Grotesk'] text-lg font-bold text-slate-900">
-                  Campus Bulletins
-                </h3>
-                <span className="rounded-full bg-indigo-50 border border-indigo-200 px-2.5 py-0.5 text-[10px] font-bold text-indigo-700">
-                  Live
-                </span>
-              </div>
-
-              <div className="space-y-4">
-                {announcements.slice(0, 4).map((ann) => (
-                  <div key={ann.id} className="border-b border-slate-100 pb-3.5 last:border-none last:pb-0">
-                    <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-700 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded-full">
-                        {ann.category || 'General'}
-                      </span>
-                      <span className="text-[10px] text-slate-400 font-medium">
-                        {new Date(ann.created_at || Date.now()).toLocaleDateString()}
-                      </span>
-                    </div>
-                    <h4 className="text-xs font-bold text-slate-800 line-clamp-1">{ann.title}</h4>
-                    <p className="text-[11px] text-slate-500 line-clamp-2 mt-1 leading-relaxed">
-                      {ann.content}
+            <div className="glass-card rounded-3xl p-5 border border-slate-200 shadow-sm bg-white overflow-hidden transition-all">
+              {/* Card Header with Dropdown Controls */}
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div className="flex items-center gap-2">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
+                    <Megaphone className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <h3 className="font-['Space_Grotesk'] text-base font-bold text-slate-900 flex items-center gap-1.5">
+                      Campus Bulletins
+                      <span className="inline-flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                    </h3>
+                    <p className="text-[10px] text-slate-400 font-medium">
+                      {announcements.length} updates published
                     </p>
                   </div>
-                ))}
+                </div>
+
+                <div className="flex items-center gap-1.5">
+                  {/* Category Filter Dropdown */}
+                  <div className="relative">
+                    <button
+                      onClick={() => setFilterDropdownOpen(!filterDropdownOpen)}
+                      className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-slate-100 hover:bg-slate-200/80 text-[11px] font-bold text-slate-700 transition"
+                      title="Filter bulletins by category"
+                    >
+                      <Filter className="w-3 h-3 text-slate-500" />
+                      <span className="capitalize">{bulletinFilter === 'all' ? 'All' : bulletinFilter}</span>
+                      <ChevronDown className={`w-3 h-3 text-slate-400 transition-transform duration-200 ${filterDropdownOpen ? 'rotate-180' : ''}`} />
+                    </button>
+
+                    <AnimatePresence>
+                      {filterDropdownOpen && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 5, scale: 0.95 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          exit={{ opacity: 0, y: 5, scale: 0.95 }}
+                          transition={{ duration: 0.15 }}
+                          className="absolute right-0 mt-1.5 w-40 rounded-2xl bg-white border border-slate-200 shadow-xl p-1.5 z-30"
+                        >
+                          {[
+                            { id: 'all', label: 'All Updates' },
+                            { id: 'important', label: 'Important' },
+                            { id: 'club', label: 'Club News' },
+                            { id: 'opportunity', label: 'Opportunities' },
+                            { id: 'event', label: 'Events' },
+                            { id: 'general', label: 'General' },
+                          ].map((cat) => {
+                            const count = cat.id === 'all' 
+                              ? announcements.length 
+                              : announcements.filter(a => (a.category || 'general').toLowerCase() === cat.id).length;
+                            return (
+                              <button
+                                key={cat.id}
+                                onClick={() => {
+                                  setBulletinFilter(cat.id);
+                                  setFilterDropdownOpen(false);
+                                }}
+                                className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs font-semibold transition ${
+                                  bulletinFilter === cat.id
+                                    ? 'bg-indigo-50 text-indigo-700 font-bold'
+                                    : 'text-slate-600 hover:bg-slate-50'
+                                }`}
+                              >
+                                <span>{cat.label}</span>
+                                <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-500 font-bold">
+                                  {count}
+                                </span>
+                              </button>
+                            );
+                          })}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+
+                  {/* Accordion Collapse/Expand Button for Card */}
+                  <button
+                    onClick={() => setBulletinsExpanded(!bulletinsExpanded)}
+                    className="flex h-7 w-7 items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200/80 text-slate-600 transition"
+                    title={bulletinsExpanded ? "Collapse Bulletins" : "Expand Bulletins"}
+                  >
+                    <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${bulletinsExpanded ? 'rotate-180' : ''}`} />
+                  </button>
+                </div>
               </div>
+
+              {/* Collapsible Bulletin Body */}
+              <AnimatePresence initial={false}>
+                {bulletinsExpanded ? (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.25 }}
+                    className="overflow-hidden"
+                  >
+                    {/* Filter quick pills */}
+                    <div className="flex items-center gap-1.5 py-3 overflow-x-auto no-scrollbar border-b border-slate-100">
+                      {['all', 'important', 'club', 'opportunity'].map((cat) => (
+                        <button
+                          key={cat}
+                          onClick={() => setBulletinFilter(cat)}
+                          className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider whitespace-nowrap transition-all ${
+                            bulletinFilter === cat
+                              ? 'bg-indigo-600 text-white shadow-xs'
+                              : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                          }`}
+                        >
+                          {cat}
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Bulletins Accordion Items */}
+                    <div className="space-y-2.5 pt-3">
+                      {announcements
+                        .filter(ann => bulletinFilter === 'all' || (ann.category || 'general').toLowerCase() === bulletinFilter.toLowerCase())
+                        .length === 0 ? (
+                        <div className="text-center py-6">
+                          <p className="text-xs text-slate-500 font-medium">No bulletins found in this category.</p>
+                          <button
+                            onClick={() => setBulletinFilter('all')}
+                            className="mt-2 text-xs font-bold text-indigo-600 hover:underline"
+                          >
+                            View all updates
+                          </button>
+                        </div>
+                      ) : (
+                        announcements
+                          .filter(ann => bulletinFilter === 'all' || (ann.category || 'general').toLowerCase() === bulletinFilter.toLowerCase())
+                          .slice(0, 6)
+                          .map((ann) => {
+                            const isItemExpanded = expandedBulletinId === ann.id;
+                            const category = (ann.category || 'general').toLowerCase();
+                            
+                            const getBadgeStyles = () => {
+                              switch (category) {
+                                case 'important':
+                                  return 'bg-rose-50 text-rose-700 border-rose-200';
+                                case 'opportunity':
+                                  return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+                                case 'club':
+                                  return 'bg-indigo-50 text-indigo-700 border-indigo-200';
+                                case 'event':
+                                  return 'bg-sky-50 text-sky-700 border-sky-200';
+                                default:
+                                  return 'bg-slate-100 text-slate-700 border-slate-200';
+                              }
+                            };
+
+                            return (
+                              <div
+                                key={ann.id}
+                                className={`rounded-2xl border transition-all duration-200 overflow-hidden ${
+                                  isItemExpanded
+                                    ? 'bg-slate-50/90 border-indigo-200 shadow-xs'
+                                    : 'bg-white hover:bg-slate-50/60 border-slate-100 hover:border-slate-200'
+                                }`}
+                              >
+                                {/* Accordion Item Header (Click to Drop Down / Expand) */}
+                                <button
+                                  onClick={() => setExpandedBulletinId(isItemExpanded ? null : ann.id)}
+                                  className="w-full text-left p-3 flex items-start justify-between gap-2.5 cursor-pointer"
+                                >
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2 mb-1">
+                                      <span className={`text-[9px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full border ${getBadgeStyles()}`}>
+                                        {ann.category || 'General'}
+                                      </span>
+                                      <span className="text-[10px] text-slate-400 font-medium">
+                                        {new Date(ann.created_at || Date.now()).toLocaleDateString()}
+                                      </span>
+                                    </div>
+                                    <h4 className={`text-xs font-bold transition-colors ${isItemExpanded ? 'text-indigo-700' : 'text-slate-800 line-clamp-1'}`}>
+                                      {ann.title}
+                                    </h4>
+                                  </div>
+                                  <div className={`p-1 rounded-lg text-slate-400 hover:text-slate-600 transition-transform duration-200 ${isItemExpanded ? 'rotate-180 text-indigo-600' : ''}`}>
+                                    <ChevronDown className="w-3.5 h-3.5" />
+                                  </div>
+                                </button>
+
+                                {/* Accordion Item Dropdown Body */}
+                                <AnimatePresence initial={false}>
+                                  {isItemExpanded && (
+                                    <motion.div
+                                      initial={{ height: 0, opacity: 0 }}
+                                      animate={{ height: 'auto', opacity: 1 }}
+                                      exit={{ height: 0, opacity: 0 }}
+                                      transition={{ duration: 0.2 }}
+                                      className="px-3 pb-3 pt-0 border-t border-indigo-100/60"
+                                    >
+                                      <p className="text-xs text-slate-600 leading-relaxed font-normal mt-2">
+                                        {ann.content}
+                                      </p>
+                                      <div className="mt-2.5 pt-2 border-t border-slate-200/60 flex items-center justify-between text-[10px] text-slate-400">
+                                        <span className="flex items-center gap-1 font-medium">
+                                          <Clock className="w-3 h-3 text-slate-400" />
+                                          Posted on {new Date(ann.created_at || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                        </span>
+                                        <span className="font-bold text-indigo-600">Official Notice</span>
+                                      </div>
+                                    </motion.div>
+                                  )}
+                                </AnimatePresence>
+                              </div>
+                            );
+                          })
+                      )}
+                    </div>
+                  </motion.div>
+                ) : (
+                  <div
+                    onClick={() => setBulletinsExpanded(true)}
+                    className="py-3 text-center cursor-pointer hover:bg-slate-50 rounded-2xl transition"
+                  >
+                    <p className="text-xs font-bold text-indigo-600 flex items-center justify-center gap-1">
+                      <span>Click to view {announcements.length} live bulletins</span>
+                      <ChevronDown className="w-3.5 h-3.5" />
+                    </p>
+                  </div>
+                )}
+              </AnimatePresence>
             </div>
 
             {/* Quick Links Card */}

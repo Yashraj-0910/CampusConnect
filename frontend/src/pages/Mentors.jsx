@@ -236,26 +236,27 @@ const Mentors = () => {
       {/* QA Dialog Modal */}
       <AnimatePresence>
         {selectedMentor && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-3 sm:p-4 overflow-y-auto">
             <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="w-full max-w-2xl rounded-3xl bg-white border border-slate-200 p-6 sm:p-8 shadow-2xl relative flex flex-col max-h-[85vh]"
+              initial={{ opacity: 0, scale: 0.95, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 15 }}
+              className="w-full max-w-2xl rounded-3xl bg-white border border-slate-200 p-4 sm:p-6 md:p-8 shadow-2xl relative flex flex-col max-h-[90vh] my-auto"
             >
               <button
                 onClick={() => setSelectedMentor(null)}
-                className="absolute top-6 right-6 text-slate-400 hover:text-slate-600"
+                className="absolute top-4 sm:top-6 right-4 sm:right-6 p-1 rounded-xl text-slate-400 hover:text-slate-600 bg-slate-100 cursor-pointer"
               >
                 <X className="h-5 w-5" />
               </button>
 
-              <h3 className="font-['Space_Grotesk'] text-xl font-bold text-slate-900 mb-1">
+              <h3 className="font-['Space_Grotesk'] text-lg sm:text-xl font-bold text-slate-900 mb-1 pr-8">
                 Q&A with {selectedMentor.User?.name}
               </h3>
               <p className="text-xs text-slate-500 border-b border-slate-100 pb-3 mb-4 font-medium">
                 Specialized in: {selectedMentor.interests}
               </p>
+
 
               {/* QA List */}
               <div className="flex-1 overflow-y-auto space-y-4 mb-4 pr-2">
