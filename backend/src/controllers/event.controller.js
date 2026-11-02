@@ -1,5 +1,5 @@
 const { Op } = require('sequelize');
-const { Event, EventRegistration, Student, User, Club, EventGallery } = require('../models');
+const { Event, EventRegistration, Student, User, Club, ClubCoordinator, EventGallery } = require('../models');
 
 const getEvents = async (req, res) => {
   try {
@@ -167,6 +167,24 @@ const verifyAttendance = async (req, res) => {
   const { ticket_token } = req.body;
 
   try {
+    // Authorization: verify the requester is admin or coordinator of this event's club
+    const event = await Event.findByPk(eventId);
+    if (!event) {
+      return res.status(404).json({ success: false, message: 'Event not found.' });
+    }
+
+    if (req.user.role !== 'admin') {
+      const coord = await ClubCoordinator.findOne({
+        where: { user_id: req.user.id, club_id: event.club_id }
+      });
+      if (!coord) {
+        return res.status(403).json({
+          success: false,
+          message: 'Forbidden: You are not a coordinator for this event\'s club.'
+        });
+      }
+    }
+
     if (!ticket_token) {
       return res.status(400).json({ success: false, message: 'Ticket token is required.' });
     }
@@ -225,6 +243,24 @@ const getEventAttendees = async (req, res) => {
   const { id: eventId } = req.params;
 
   try {
+    // Authorization: verify the requester is admin or coordinator of this event's club
+    const event = await Event.findByPk(eventId);
+    if (!event) {
+      return res.status(404).json({ success: false, message: 'Event not found.' });
+    }
+
+    if (req.user.role !== 'admin') {
+      const coord = await ClubCoordinator.findOne({
+        where: { user_id: req.user.id, club_id: event.club_id }
+      });
+      if (!coord) {
+        return res.status(403).json({
+          success: false,
+          message: 'Forbidden: You are not a coordinator for this event\'s club.'
+        });
+      }
+    }
+
     const attendees = await EventRegistration.findAll({
       where: { event_id: eventId },
       include: [
